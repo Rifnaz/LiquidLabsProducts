@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using ServiceLayer.Interfaces;
 using System.Text.Json;
 
 namespace WebAPI.Controllers
@@ -8,60 +9,43 @@ namespace WebAPI.Controllers
 	public class ProductController : ControllerBase
 	{
 		private readonly HttpClient _httpClient;
+		private readonly IProductService _product;
 
-		public ProductController(HttpClient httpClient)
+		public ProductController(HttpClient httpClient, IProductService product)
 		{
 			_httpClient = httpClient;
+			_product    = product;
 		}
 
-		// GET: api/<ProductController>
+		/// <summary>
+		/// Get all products 
+		/// </summary>
+		/// <returns></returns>
 		[HttpGet]
 		public async Task<IActionResult> Get()
 		{
-			string ApiUrl = "https://dummyjson.com/products";
+			var products =  await _product.GetProducts();
 
-			try
-			{
-				var response = await _httpClient.GetAsync(ApiUrl);
+			if (products == null || !products.Any())
+				return NotFound();
 
-				if (!response.IsSuccessStatusCode)
-					return BadRequest(response.RequestMessage);
-
-				var content = await response.Content.ReadAsStringAsync();
-
-				var json = JsonDocument.Parse(content);
-
-				return Ok(json.RootElement);
-			}
-			catch (Exception ex)
-			{
-				return BadRequest(ex.Message);
-			}
+			return Ok(products);
 		}
 
-		// GET api/<ProductController>/5
+		/// <summary>
+		/// Get product details by id
+		/// </summary>
+		/// <param name="id"></param>
+		/// <returns></returns>
 		[HttpGet("{id}")]
 		public async Task<IActionResult> Get(int id)
 		{
-			string ApiUrl = $"https://dummyjson.com/products/{id}";
+			var product = await _product.GetProductById(id);
 
-			try
-			{
-				var response = await _httpClient.GetAsync(ApiUrl);
+			if (product == null)
+				return NotFound();
 
-				if (!response.IsSuccessStatusCode)
-					return BadRequest(response.RequestMessage);
-
-				var content = await response.Content.ReadAsStringAsync();
-
-				var json = JsonDocument.Parse(content);
-
-				return Ok(json.RootElement);
-			}
-			catch (Exception ex)
-			{
-				return BadRequest(ex.Message);
-			}
+			return Ok(product);
 		}
 	}
 }
