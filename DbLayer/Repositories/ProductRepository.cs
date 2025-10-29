@@ -13,14 +13,68 @@ namespace DbLayer.Repositories
 			_connectionString = connectionString;
 		}
 
+		/// <summary>
+		/// Get all products from database
+		/// </summary>
+		/// <returns></returns>
 		public async Task<List<Product>> GetProducts()
 		{
-			return new List<Product>();
+			using var con = new SqlConnection(_connectionString);
+			await con.OpenAsync();
+
+			try
+			{
+				var query        = $@"SELECT * FROM {nameof(Product)};";
+				using var cmd    = new SqlCommand(query, con);
+				using var reader = await cmd.ExecuteReaderAsync();
+
+				var products = new List<Product>();
+
+				while (await reader.ReadAsync())
+				{
+					var product = await MakeProduct(reader);
+
+					products.Add(product);
+				}
+
+				return products;
+			}
+			catch (Exception ex)
+			{
+				return new();
+			}
 		}
 
+		/// <summary>
+		/// Get product details by id
+		/// </summary>
+		/// <param name="id"></param>
+		/// <returns></returns>
 		public async Task<Product> GetProductById(int id)
 		{
-			return new Product();
+			using var con = new SqlConnection(_connectionString);
+			await con.OpenAsync();
+
+			try
+			{
+				var query = $@"SELECT * FROM {nameof(Product)} WHERE {nameof(Product.Id)} = @Id;";
+
+				using var cmd = new SqlCommand(query, con);
+				cmd.Parameters.AddWithValue("@Id", id);
+
+				using var reader = await cmd.ExecuteReaderAsync();
+
+				if (await reader.ReadAsync())
+				{
+					return await MakeProduct(reader);
+				}
+
+				return new Product();
+			}
+			catch (Exception ex)
+			{
+				return new Product();
+			}
 		}
 
 		/// <summary>
@@ -77,9 +131,95 @@ namespace DbLayer.Repositories
 			}
 		}
 
+		/// <summary>
+		/// Check if any product exists in database
+		/// </summary>
+		/// <returns></returns>
 		public async Task<bool> IsAnyProductExist()
 		{
-			return false;
+			using var con = new SqlConnection(_connectionString);
+			await con.OpenAsync();
+
+			try
+			{
+				var query = $@"SELECT COUNT(1) FROM {nameof(Product)};";
+
+				using var cmd = new SqlCommand(query, con);
+				var count = (int)await cmd.ExecuteScalarAsync();
+
+				return count > 0;
+			}
+			catch (Exception ex)
+			{
+				return false;
+			}
+		}
+
+		/// <summary>
+		/// Preare product from data reader
+		/// </summary>
+		/// <param name="reader"></param>
+		/// <returns></returns>
+		private async Task<Product> MakeProduct(SqlDataReader reader)
+		{
+			var productId = (int)reader[nameof(Product.Id)];
+
+			var product = new Product
+			{
+				Id          = productId,
+				Title       = reader[nameof(Product.Title)].ToString(),
+				Description = reader[nameof(Product.Description)].ToString(),
+				Category    = reader[nameof(Product.Category)].ToString(),
+				Price       = (decimal)reader[nameof(Product.Price)],
+				Stock       = (int)reader[nameof(Product.Stock)],
+				Reviews     = await GetReviewsByProductd(productId)
+			};
+
+			return product;
+		}
+
+		/// <summary>
+		/// Get reviews by product id
+		/// </summary>
+		/// <param name="productId"></param>
+		/// <returns></returns>
+		private async Task<List<Reviews>> GetReviewsByProductd(int productId)
+		{
+			using var con = new SqlConnection(_connectionString);
+			await con.OpenAsync();
+
+			try
+			{
+				var query = $@"SELECT * FROM {nameof(Reviews)} WHERE {nameof(Reviews.ProductId)} = @ProductId;";
+
+				using var cmd = new SqlCommand(query, con);
+				cmd.Parameters.AddWithValue("@ProductId", productId);
+
+				using var reader = await cmd.ExecuteReaderAsync();
+				var reviews = new List<Reviews>();
+
+				while (await reader.ReadAsync())
+				{
+					var review = new Reviews
+					{
+						Id            = (int)reader[nameof(Reviews.Id)],
+						ProductId     = (int)reader[nameof(Reviews.ProductId)],
+						Rating        = (int)reader[nameof(Reviews.Rating)],
+						Comment       = reader[nameof(Reviews.Comment)].ToString(),
+						Date          = (DateTime)reader[nameof(Reviews.Date)],
+						ReviewerName  = reader[nameof(Reviews.ReviewerName)].ToString(),
+						ReviewerEmail = reader[nameof(Reviews.ReviewerEmail)].ToString()
+					};
+
+					reviews.Add(review);
+				}
+
+				return reviews;
+			}
+			catch (Exception ex)
+			{
+				return new();
+			}
 		}
 
 		/// <summary>

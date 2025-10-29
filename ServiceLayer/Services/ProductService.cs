@@ -24,20 +24,10 @@ namespace ServiceLayer.Services
 		/// <returns></returns>
 		public async Task<List<Product>> GetProducts()
 		{
-			//var isAnyProductExist = await _product.IsAnyProductExist();
+			if(!await IsRecordReady())
+				return new();
 
-			//if (!isAnyProductExist)
-			//{
-			//	var productsFromApi = await GetProductsFromAPI();
-			//	var addResult       = await _product.AddProducts(productsFromApi);
-
-			//	if (!addResult.succeed)
-			//		return new();
-			//}
-			
-			//return await _product.GetProducts();
-
-			return await GetProductsFromAPI();
+			return await _product.GetProducts();
 		}
 
 		/// <summary>
@@ -47,6 +37,9 @@ namespace ServiceLayer.Services
 		/// <returns></returns>
 		public async Task<Product> GetProductById(int id)
 		{
+			if (!await IsRecordReady())
+				return new();
+
 			return await _product.GetProductById(id);
 		}
 
@@ -74,6 +67,23 @@ namespace ServiceLayer.Services
 			{
 				return new();
 			}
+		}
+
+		/// <summary>
+		/// Check if records are ready in database, if not get from external API and save to database
+		/// </summary>
+		/// <returns></returns>
+		private async Task<bool> IsRecordReady()
+		{
+			var isAnyProductExist = await _product.IsAnyProductExist();
+
+			if (isAnyProductExist)
+				return true;
+
+			var productsFromApi = await GetProductsFromAPI();
+			var addResult = await _product.AddProducts(productsFromApi);
+
+			return addResult.succeed;
 		}
 	}
 }
