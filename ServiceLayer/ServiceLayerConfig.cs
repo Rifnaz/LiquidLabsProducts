@@ -8,6 +8,7 @@ namespace ServiceLayer
 	{
 		public static IServiceCollection AddBusinessLogicServices(this IServiceCollection services)
 		{
+			services.AddMemoryCache();
 			services.AddTransient<IProductService, ProductService>();
 
 			return services;

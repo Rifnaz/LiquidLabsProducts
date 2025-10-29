@@ -81,8 +81,9 @@ namespace DbLayer.Repositories
 		/// Add products with their reviews in a transaction if any error occurs rollback the transaction will undo all changes
 		/// </summary>
 		/// <param name="products"></param>
+		/// <param name="onSuccess"></param>
 		/// <returns></returns>
-		public async Task<(bool succeed, string meesage)> AddProducts(List<Product> products)
+		public async Task<(bool succeed, string meesage)> AddProducts(List<Product> products, Action onSuccess = null)
 		{
 			await using var con = new SqlConnection(_connectionString);
 			await con.OpenAsync();
@@ -121,6 +122,7 @@ namespace DbLayer.Repositories
 				}
 
 				await transaction.CommitAsync();
+				onSuccess?.Invoke();
 				return (true, "Product added successfully.");
 			}
 

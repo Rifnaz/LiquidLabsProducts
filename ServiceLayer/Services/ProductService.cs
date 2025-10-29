@@ -2,8 +2,9 @@
 using DbLayer.Helpers;
 using DbLayer.Interfaces;
 using ServiceLayer.Interfaces;
-using System.Reflection.Metadata;
+using Microsoft.Extensions.Caching.Memory;
 using System.Text.Json;
+using DbLayer.Helpers.Enums;
 
 namespace ServiceLayer.Services
 {
@@ -11,11 +12,13 @@ namespace ServiceLayer.Services
 	{
 		private readonly HttpClient _httpClient;
 		private readonly IProductRepository _product;
+		private readonly IMemoryCache _cache;
 
-		public ProductService(HttpClient httpClient, IProductRepository product)
+		public ProductService(HttpClient httpClient, IProductRepository product, IMemoryCache cache)
 		{
 			_httpClient = httpClient;
-			_product   = product;
+			_product    = product;
+			_cache      = cache;
 		}
 
 		/// <summary>
@@ -24,10 +27,17 @@ namespace ServiceLayer.Services
 		/// <returns></returns>
 		public async Task<List<Product>> GetProducts()
 		{
-			if(!await IsRecordReady())
+			if(_cache.TryGetValue(CacheKeys.ProductsCacheKey, out List<Product> cachedProducts))
+				return cachedProducts;
+
+			if (!await IsRecordReady())
 				return new();
 
-			return await _product.GetProducts();
+			var products = await _product.GetProducts();
+
+			_cache.Set(CacheKeys.ProductsCacheKey, products, TimeSpan.FromMinutes(5));
+
+			return products;
 		}
 
 		/// <summary>
@@ -37,10 +47,17 @@ namespace ServiceLayer.Services
 		/// <returns></returns>
 		public async Task<Product> GetProductById(int id)
 		{
+			if (_cache.TryGetValue(CacheKeys.ProductsCacheKey, out Product cachedProduct))
+				return cachedProduct;
+
 			if (!await IsRecordReady())
 				return new();
 
-			return await _product.GetProductById(id);
+			var product =  await _product.GetProductById(id);
+
+			_cache.Set(CacheKeys.ProductByIdCacheKey, product, TimeSpan.FromMinutes(5));
+
+			return product;
 		}
 
 		/// <summary>
@@ -81,9 +98,18 @@ namespace ServiceLayer.Services
 				return true;
 
 			var productsFromApi = await GetProductsFromAPI();
-			var addResult = await _product.AddProducts(productsFromApi);
+			var addResult = await _product.AddProducts(productsFromApi, ClearCache);
 
 			return addResult.succeed;
+		}
+
+		/// <summary>
+		/// Clear cache entries
+		/// </summary>
+		private void ClearCache()
+		{
+			_cache.Remove(CacheKeys.ProductsCacheKey);
+			_cache.Remove(CacheKeys.ProductByIdCacheKey);
 		}
 	}
 }

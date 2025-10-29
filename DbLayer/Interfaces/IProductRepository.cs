@@ -16,13 +16,14 @@ namespace DbLayer.Interfaces
 		/// <param name="id"></param>
 		/// <returns></returns>
 		Task<Product> GetProductById(int id);
-		
+
 		/// <summary>
 		/// Add products with their reviews in a transaction if any error occurs rollback the transaction will undo all changes
 		/// </summary>
 		/// <param name="products"></param>
+		/// <param name="onSuccess"></param>
 		/// <returns></returns>
-		Task<(bool succeed, string meesage)> AddProducts(List<Product> products);
+		Task<(bool succeed, string meesage)> AddProducts(List<Product> products, Action onSuccess = null);
 
 		/// <summary>
 		/// Check if any product exists in database
