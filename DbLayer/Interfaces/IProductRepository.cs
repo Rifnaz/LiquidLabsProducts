@@ -10,6 +10,11 @@ namespace DbLayer.Interfaces
 		/// <returns></returns>
 		Task<List<Product>> GetProducts();
 
+		/// <summary>
+		/// Get product details by id
+		/// </summary>
+		/// <param name="id"></param>
+		/// <returns></returns>
 		Task<Product> GetProductById(int id);
 		
 		/// <summary>

@@ -40,6 +40,7 @@ namespace DbLayer.Data
 									CREATE TABLE {nameof(Reviews)} (
 									{nameof(Reviews.Id)} INT IDENTITY(1,1) PRIMARY KEY,
 									{nameof(Reviews.ProductId)} INT NOT NULL,
+									{nameof(Reviews.Rating)} INT NOT NULL DEFAULT 0,
 									{nameof(Reviews.Comment)} NVARCHAR(255),
 									[{nameof(Reviews.Date)}] Date NOT NULL DEFAULT CAST(GETDATE() AS DATE),
 									{nameof(Reviews.ReviewerName)} NVARCHAR(255),

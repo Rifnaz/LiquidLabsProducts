@@ -19,14 +19,14 @@ namespace DbLayer.Repositories
 		/// <returns></returns>
 		public async Task<List<Product>> GetProducts()
 		{
-			using var con = new SqlConnection(_connectionString);
+			await using var con = new SqlConnection(_connectionString);
 			await con.OpenAsync();
 
 			try
 			{
 				var query        = $@"SELECT * FROM {nameof(Product)};";
-				using var cmd    = new SqlCommand(query, con);
-				using var reader = await cmd.ExecuteReaderAsync();
+				await using var cmd    = new SqlCommand(query, con);
+				await using var reader = await cmd.ExecuteReaderAsync();
 
 				var products = new List<Product>();
 
@@ -52,17 +52,17 @@ namespace DbLayer.Repositories
 		/// <returns></returns>
 		public async Task<Product> GetProductById(int id)
 		{
-			using var con = new SqlConnection(_connectionString);
+			await using var con = new SqlConnection(_connectionString);
 			await con.OpenAsync();
 
 			try
 			{
 				var query = $@"SELECT * FROM {nameof(Product)} WHERE {nameof(Product.Id)} = @Id;";
 
-				using var cmd = new SqlCommand(query, con);
+				await using var cmd = new SqlCommand(query, con);
 				cmd.Parameters.AddWithValue("@Id", id);
 
-				using var reader = await cmd.ExecuteReaderAsync();
+				await using var reader = await cmd.ExecuteReaderAsync();
 
 				if (await reader.ReadAsync())
 				{
@@ -84,10 +84,10 @@ namespace DbLayer.Repositories
 		/// <returns></returns>
 		public async Task<(bool succeed, string meesage)> AddProducts(List<Product> products)
 		{
-			using var con = new SqlConnection(_connectionString);
+			await using var con = new SqlConnection(_connectionString);
 			await con.OpenAsync();
 
-			using var transaction = await con.BeginTransactionAsync();
+			await using var transaction = await con.BeginTransactionAsync();
 
 			try
 			{
@@ -96,9 +96,9 @@ namespace DbLayer.Repositories
 				{
 					var query = $@"INSERT INTO {nameof(Product)} 
 							({nameof(Product.Title)}, {nameof(Product.Description)}, {nameof(Product.Category)}, {nameof(Product.Price)}, {nameof(Product.Stock)}) 
-							VALUES (@Title, @Description, @Category, @Price, @Stock);";
+							VALUES (@Title, @Description, @Category, @Price, @Stock); SELECT CAST(SCOPE_IDENTITY() AS INT);";
 
-					using var cmd = new SqlCommand(query, con);
+					await using var cmd = new SqlCommand(query, con, (SqlTransaction)transaction);
 
 					cmd.Parameters.AddWithValue("@Title", product.Title);
 					cmd.Parameters.AddWithValue("@Description", product.Description);
@@ -110,7 +110,7 @@ namespace DbLayer.Repositories
 
 					if (product.Reviews != null && product.Reviews.Count > 0)
 					{
-						var addReviewsResult = await AddReviews(product.Reviews, productId, con);
+						var addReviewsResult = await AddReviews(product.Reviews, productId, con, (SqlTransaction)transaction);
 						
 						if (!addReviewsResult.succeed)
 						{
@@ -137,14 +137,14 @@ namespace DbLayer.Repositories
 		/// <returns></returns>
 		public async Task<bool> IsAnyProductExist()
 		{
-			using var con = new SqlConnection(_connectionString);
+			await using var con = new SqlConnection(_connectionString);
 			await con.OpenAsync();
 
 			try
 			{
 				var query = $@"SELECT COUNT(1) FROM {nameof(Product)};";
 
-				using var cmd = new SqlCommand(query, con);
+				await using var cmd = new SqlCommand(query, con);
 				var count = (int)await cmd.ExecuteScalarAsync();
 
 				return count > 0;
@@ -185,17 +185,17 @@ namespace DbLayer.Repositories
 		/// <returns></returns>
 		private async Task<List<Reviews>> GetReviewsByProductd(int productId)
 		{
-			using var con = new SqlConnection(_connectionString);
+			await using var con = new SqlConnection(_connectionString);
 			await con.OpenAsync();
 
 			try
 			{
 				var query = $@"SELECT * FROM {nameof(Reviews)} WHERE {nameof(Reviews.ProductId)} = @ProductId;";
 
-				using var cmd = new SqlCommand(query, con);
+				await using var cmd = new SqlCommand(query, con);
 				cmd.Parameters.AddWithValue("@ProductId", productId);
 
-				using var reader = await cmd.ExecuteReaderAsync();
+				await using var reader = await cmd.ExecuteReaderAsync();
 				var reviews = new List<Reviews>();
 
 				while (await reader.ReadAsync())
@@ -229,7 +229,7 @@ namespace DbLayer.Repositories
 		/// <param name="ProductId"></param>
 		/// <param name="con"></param>
 		/// <returns></returns>
-		private async Task<(bool succeed, string message)> AddReviews(List<Reviews> reviews, int ProductId, SqlConnection con)
+		private async Task<(bool succeed, string message)> AddReviews(List<Reviews> reviews, int ProductId, SqlConnection con, SqlTransaction transaction)
 		{
 			try
 			{
@@ -239,7 +239,7 @@ namespace DbLayer.Repositories
 							({nameof(Reviews.ProductId)}, {nameof(Reviews.Rating)}, {nameof(Reviews.Comment)}, {nameof(Reviews.Date)}, {nameof(Reviews.ReviewerName)}, {nameof(Reviews.ReviewerEmail)}) 
 							VALUES (@ProductId, @Rating, @Comment, @Date, @ReviewerName, @ReviewerEmail);";
 
-					using var cmd = new SqlCommand(query, con);
+					await using var cmd = new SqlCommand(query, con, transaction);
 
 					cmd.Parameters.AddWithValue("@ProductId", ProductId);
 					cmd.Parameters.AddWithValue("@Rating", review.Rating);
