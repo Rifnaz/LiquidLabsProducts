@@ -1,6 +1,11 @@
+using DbLayer;
+using ServiceLayer;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddDataAccessServices();
+builder.Services.AddBusinessLogicServices();
 
 builder.Services.AddControllers(); 
 builder.Services.AddHttpClient();
