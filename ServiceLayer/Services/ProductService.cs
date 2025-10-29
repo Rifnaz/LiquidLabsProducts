@@ -1,4 +1,4 @@
-﻿using DbLayer.Data;
+﻿using DbLayer.Data.Models;
 using DbLayer.Helpers;
 using DbLayer.Interfaces;
 using ServiceLayer.Interfaces;

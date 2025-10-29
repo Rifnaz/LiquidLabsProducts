@@ -1,4 +1,4 @@
-﻿namespace DbLayer.Data
+﻿namespace DbLayer.Data.Models
 {
 	public class Product
 	{

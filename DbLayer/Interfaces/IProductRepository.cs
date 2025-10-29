@@ -1,4 +1,4 @@
-﻿using DbLayer.Data;
+﻿using DbLayer.Data.Models;
 
 namespace DbLayer.Interfaces
 {
