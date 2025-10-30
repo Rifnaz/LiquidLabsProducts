@@ -48,7 +48,7 @@ This is a primary way to run and test the application locally.
 
 1. Make sure you have installed Microsoft Sql Server and .NET 9 SDK
 3. Clone the Project from Github the Repository LiquidLabsProducts => https://github.com/Rifnaz/LiquidLabsProducts.git
-4. Redirect to prject folder CoverageXTodo `cd LiquidLabsProducts` Open the project in visual studio.
+4. Redirect to prject folder `cd LiquidLabsProducts` Open the project in visual studio.
 5. Update the connection string in `appsettings.json` according to your mssql setup.
 6. **!Important: Keep the Database as `LiquidLabsProducts`**
 7. Build and run the project (dotnet run or using Visual studio run).
