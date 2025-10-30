@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ServiceLayer.Interfaces;
-using System.Text.Json;
 
 namespace WebAPI.Controllers
 {
@@ -18,9 +17,12 @@ namespace WebAPI.Controllers
 		}
 
 		/// <summary>
-		/// Get all products 
+		/// Get all products from database
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>
+		/// Succeed: List of products as JSON array and 200 OK
+		/// Error: 404 Not Found
+		/// </returns>
 		[HttpGet]
 		public async Task<IActionResult> Get()
 		{
@@ -35,8 +37,11 @@ namespace WebAPI.Controllers
 		/// <summary>
 		/// Get product details by id
 		/// </summary>
-		/// <param name="id"></param>
-		/// <returns></returns>
+		/// <param name="id">Primary Key of Products</param>
+		/// <returns>
+		/// Succeed: A object with Product details as JSON and 200 OK
+		/// Error: 404 Not Found
+		/// </returns>
 		[HttpGet("{id}")]
 		public async Task<IActionResult> Get(int id)
 		{

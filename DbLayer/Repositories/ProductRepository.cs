@@ -16,7 +16,10 @@ namespace DbLayer.Repositories
 		/// <summary>
 		/// Get all products from database
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>
+		/// Succeed: List of products	
+		/// Error: Empty list
+		/// </returns>
 		public async Task<List<Product>> GetProducts()
 		{
 			await using var con = new SqlConnection(_connectionString);
@@ -48,8 +51,11 @@ namespace DbLayer.Repositories
 		/// <summary>
 		/// Get product details by id
 		/// </summary>
-		/// <param name="id"></param>
-		/// <returns></returns>
+		/// <param name="id">Primary Key of the Product</param>
+		/// <returns>
+		/// Succeed: A object with Product details
+		/// Error: An empty object
+		/// </returns>
 		public async Task<Product> GetProductById(int id)
 		{
 			await using var con = new SqlConnection(_connectionString);
@@ -80,9 +86,12 @@ namespace DbLayer.Repositories
 		/// <summary>
 		/// Add products with their reviews in a transaction if any error occurs rollback the transaction will undo all changes
 		/// </summary>
-		/// <param name="products"></param>
-		/// <param name="onSuccess"></param>
-		/// <returns></returns>
+		/// <param name="products">List of products got from API response</param>
+		/// <param name="onSuccess">Call back function to invoke on add record success</param>
+		/// <returns>
+		/// Succeed: Returns True with success message
+		/// Error: Returns False with error message
+		/// </returns>
 		public async Task<(bool succeed, string meesage)> AddProducts(List<Product> products, Action onSuccess = null)
 		{
 			await using var con = new SqlConnection(_connectionString);
@@ -136,7 +145,10 @@ namespace DbLayer.Repositories
 		/// <summary>
 		/// Check if any product exists in database
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>
+		/// Succeed: True or False if any product exists or not
+		/// Error: False
+		/// </returns>
 		public async Task<bool> IsAnyProductExist()
 		{
 			await using var con = new SqlConnection(_connectionString);
@@ -158,10 +170,12 @@ namespace DbLayer.Repositories
 		}
 
 		/// <summary>
-		/// Preare product from data reader
+		/// Prepare product from data reader
 		/// </summary>
-		/// <param name="reader"></param>
-		/// <returns></returns>
+		/// <param name="reader">sql data reader</param>
+		/// <returns>
+		/// Succeed: Product object
+		/// </returns>
 		private async Task<Product> MakeProduct(SqlDataReader reader)
 		{
 			var productId = (int)reader[nameof(Product.Id)];
@@ -183,8 +197,11 @@ namespace DbLayer.Repositories
 		/// <summary>
 		/// Get reviews by product id
 		/// </summary>
-		/// <param name="productId"></param>
-		/// <returns></returns>
+		/// <param name="productId">Primary Key of the product and Foriegn Key of Reviews</param>
+		/// <returns>
+		/// Succeed: List of reviews for the product
+		/// Error: Empty list
+		/// </returns>
 		private async Task<List<Reviews>> GetReviewsByProductd(int productId)
 		{
 			await using var con = new SqlConnection(_connectionString);
@@ -227,9 +244,9 @@ namespace DbLayer.Repositories
 		/// <summary>
 		/// Add reviews for a product within the same SQL connection
 		/// </summary>
-		/// <param name="reviews"></param>
-		/// <param name="ProductId"></param>
-		/// <param name="con"></param>
+		/// <param name="reviews">List of Reviews</param>
+		/// <param name="ProductId">Primary Key of the product and Foriegn Key of Reviews</param>
+		/// <param name="con">Sql connection opened</param>
 		/// <returns></returns>
 		private async Task<(bool succeed, string message)> AddReviews(List<Reviews> reviews, int ProductId, SqlConnection con, SqlTransaction transaction)
 		{

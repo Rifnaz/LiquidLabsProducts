@@ -12,10 +12,15 @@ namespace DbLayer.Data
 		/// <param name="connectionString"></param>
 		public static void Initialize(string connectionString)
 		{
+			var builderConn               = new SqlConnectionStringBuilder(connectionString);
+			var databaseName              = builderConn.InitialCatalog;
+			string masterConnectionString = connectionString.Replace(databaseName, "master");
+
+			WaitForServer(masterConnectionString);
 
 			try
 			{
-				CreateDatabase(connectionString);
+				CreateDatabase(masterConnectionString, databaseName);
 			}
 			catch (Exception ex)
 			{
@@ -87,12 +92,9 @@ namespace DbLayer.Data
 		/// <summary>
 		/// Create database if not exists
 		/// </summary>
-		/// <param name="connectionString"></param>
-		private static void CreateDatabase(string connectionString)
+		/// <param name="masterConnectionString"></param>
+		private static void CreateDatabase(string masterConnectionString, string databaseName)
 		{
-			var builderConn               = new SqlConnectionStringBuilder(connectionString);
-			var databaseName              = builderConn.InitialCatalog;
-			string masterConnectionString = connectionString.Replace(databaseName, "master");
 
 			using var con = new SqlConnection(masterConnectionString);
 			con.Open();
@@ -116,6 +118,29 @@ namespace DbLayer.Data
 				Console.WriteLine("Database creation failed:");
 				Console.WriteLine(ex.Message);
 			}
+		}
+
+		private static void WaitForServer(string connectionString, int maxRetries = 30, int delayMs = 5000)
+		{
+			int retries = maxRetries;
+			while (retries > 0)
+			{
+				try
+				{
+					using var con = new SqlConnection(connectionString);
+					con.Open();
+					Console.WriteLine("SQL Server is ready.");
+					return;
+				}
+				catch
+				{
+					retries--;
+					Console.WriteLine($"SQL Server not ready. Retrying... ({retries} attempts left)");
+					Thread.Sleep(delayMs);
+				}
+			}
+
+			throw new Exception("SQL Server did not start in time.");
 		}
 	}
 }

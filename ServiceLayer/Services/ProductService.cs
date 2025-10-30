@@ -24,7 +24,10 @@ namespace ServiceLayer.Services
 		/// <summary>
 		/// Get all products from database, if not exist get from external API and save to database and return
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>
+		/// Succeed: List of products
+		/// Error: Empty list
+		/// </returns>
 		public async Task<List<Product>> GetProducts()
 		{
 			if(_cache.TryGetValue(CacheKeys.ProductsCacheKey, out List<Product> cachedProducts))
@@ -43,8 +46,11 @@ namespace ServiceLayer.Services
 		/// <summary>
 		/// Get product details by id
 		/// </summary>
-		/// <param name="id"></param>
-		/// <returns></returns>
+		/// <param name="id">Primary Key of Product</param>
+		/// <returns>
+		/// Succeed: A object with Product details
+		/// Error: An empty object
+		/// </returns>
 		public async Task<Product> GetProductById(int id)
 		{
 			if (_cache.TryGetValue(CacheKeys.ProductsCacheKey, out Product cachedProduct))
@@ -63,8 +69,11 @@ namespace ServiceLayer.Services
 		/// <summary>
 		/// Gets products from external public API (https://dummyjson.com/products)
 		/// </summary>
-		/// <returns></returns>
-		public async Task<List<Product>> GetProductsFromAPI()
+		/// <returns>
+		/// Succeed: List of products from API
+		/// Error: Empty list
+		/// </returns>
+		private async Task<List<Product>> GetProductsFromAPI()
 		{
 			try
 			{
@@ -89,12 +98,13 @@ namespace ServiceLayer.Services
 		/// <summary>
 		/// Check if records are ready in database, if not get from external API and save to database
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>
+		/// Succeed: True if records available or added successfully
+		/// Error: False
+		/// </returns>
 		private async Task<bool> IsRecordReady()
 		{
-			var isAnyProductExist = await _product.IsAnyProductExist();
-
-			if (isAnyProductExist)
+			if (await _product.IsAnyProductExist())
 				return true;
 
 			var productsFromApi = await GetProductsFromAPI();
