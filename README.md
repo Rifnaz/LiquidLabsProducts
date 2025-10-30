@@ -7,7 +7,7 @@ It’s designed to show how to connect a .NET API with a Mssql and ADO.NET using
 
 - **Backend:** ASP.NET Core Web API (.NET 9)
 - **Database:** Microsoft SQL Server
-- **Architecture:** N-Tier (API, Business Logic, Database Access Test)
+- **Architecture:** N-Tier (API, Business Logic, Database Access)
 - **Containerzation:** Docker
 
 ---
