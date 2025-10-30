@@ -99,10 +99,19 @@ It doesn’t matter which system you are using — Windows, Linux, or Mac — th
 ## Quick Access
 - **Redirect Folder:** `cd LiquidLabsProducts`
 - **Run Docker Container Cmd:** `docker compose up -d --build`
-- **Get All Products:** http://localhost:5000/api/product
-- **Get Product by Id:** http://localhost:5000/api/product/5
+- **Base Url:** http://localhost:5000
 - **API Testing Tool (Recommended):** Postman
 - **Git Repository:** https://github.com/Rifnaz/LiquidLabsProducts
+
+---
+
+## API Endpoints
+
+| Method | API ndpoint | Description |
+|----------|----------|----------|
+| GET | http://localhost:5000/api/product | Get all products |
+| GET | http://localhost:5000/api/product/{id} | Get products by Id |
+
 
 ---
 
