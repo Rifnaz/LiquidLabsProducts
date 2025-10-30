@@ -74,7 +74,7 @@ docker compose up -d --build
 **Steps**
 
 1. Clone the Project from Github the Repository LiquidLabsProducts => https://github.com/Rifnaz/LiquidLabsProducts.git
-2. Open Shell or Terminal and Redirect to prject folder CoverageXTodo `cd LiquidLabsProducts`
+2. Open Shell or Terminal and Redirect to prject folder `cd LiquidLabsProducts`
 3. Run the command `docker compose up -d --build` and wait for download all dependencies and start both images (API and Sql Server)
 4. The database `LiquidLabsProducts` and tables will be created automatically if it doesn’t existwhen application run.
 5. Test API endpoints using Postman(recommended) or your preferred tool. i. e (http://localhost:5000/api/product, http://localhost:5000/api/product/1)
