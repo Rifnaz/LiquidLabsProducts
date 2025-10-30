@@ -27,7 +27,7 @@ It’s designed to show how to connect a .NET API with a Mssql and ADO.NET using
 1. **Backend (ASP.NET Core API)**
    - Created Seperate layers to manage each logics (WebAPI, ServiceLayer(Business Logics), DbLayer(Data Access))
    - APIs are developed in Api Controllers
-   - Connected to MSSQL using DADO.NET (Raw scripts with parameterized queries)
+   - Connected to MSSQL using ADO.NET (Raw scripts with parameterized queries)
   
 2. **Integration**
    - .NET API and databse runs on same Docker network.
